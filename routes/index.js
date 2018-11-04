@@ -3,6 +3,9 @@ var router = express.Router();
 const PirateBay = require("thepiratebay");
 var cors = require('cors')
 
+router.get("/", function (req, res, next) {
+  res.send('All GOOD');
+});
 
 router.post("/tpb/search", function (req, res, next) {
   var torrent_name = req.body.torrent_name;
