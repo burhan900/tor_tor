@@ -2,18 +2,39 @@ var express = require("express");
 var router = express.Router();
 const PirateBay = require("thepiratebay");
 var cors = require('cors')
-function initialize() {
-  console.log('========UTL==========');
+function getCat() {
+  console.log('========Get Cat ==========');
   // Return new promise 
   return new Promise(function (resolve, reject) {
     PirateBay.getCategories()
+      .then(results => resolve(returnResponse(true, results)))
+      .catch(err => reject(returnResponse(false, err)));
+
+  })
+
+}
+function postSearch(searchValue) {
+  console.log('========Post Search By Torrent Name ==========');
+  // Return new promise 
+  return new Promise(function (resolve, reject) {
+    PirateBay.search(searchValue)
       .then(results => resolve(returnResponse(true, shapeResponse(results))))
       .catch(err => reject(returnResponse(false, err)));
 
   })
 
 }
+function getTop(id) {
+  console.log('========Get Top By Id ==========');
+  // Return new promise 
+  return new Promise(function (resolve, reject) {
+    PirateBay.topTorrents(id)
+      .then(results => resolve(returnResponse(true, shapeResponse(results))))
+      .catch(err => reject(returnResponse(false, err)));
 
+  })
+
+}
 router.get("/", function (req, res, next) {
   console.log("======");
   console.log(process.env.THEPIRATEBAY_DEFAULT_ENDPOINT);
@@ -27,14 +48,20 @@ router.post("/tpb/search", function (req, res, next) {
   if (torrent_name.length <= 0) {
     res.json(returnResponse(false, 'Please Fill Torrent Name With Valid Data'));
   }
+  var initializePromise = postSearch(torrent_name);
+    initializePromise.then(function (result) {
+      res.json(result)
 
-  PirateBay.search(torrent_name)
-    .then(results => res.json(returnResponse(true, shapeResponse(results))))
-    .catch(err => res.json(returnResponse(false, err)));
+    }, function (err) {
+      res.json(err);
+    })
+  // PirateBay.search(torrent_name)
+  //   .then(results => res.json(returnResponse(true, shapeResponse(results))))
+  //   .catch(err => res.json(returnResponse(false, err)));
 });
 
 router.get("/tpb/categories", function (req, res, next) {
-  var initializePromise = initialize();
+  var initializePromise = getCat();
   initializePromise.then(function (result) {
     res.json(result)
 
@@ -48,9 +75,16 @@ router.get("/tpb/categories", function (req, res, next) {
 
 router.get("/tpb/top/:id", function (req, res, next) {
   var id = req.params.id;
-  PirateBay.topTorrents(id)
-    .then(results => res.json(returnResponse(true, shapeResponse(results))))
-    .catch(err => res.json(returnResponse(false, err)));
+  var initializePromise = getTop(id);
+    initializePromise.then(function (result) {
+      res.json(result)
+
+    }, function (err) {
+      res.json(err);
+    })
+  // PirateBay.topTorrents(id)
+  //   .then(results => res.json(returnResponse(true, shapeResponse(results))))
+  //   .catch(err => res.json(returnResponse(false, err)));
 });
 
 
@@ -63,7 +97,7 @@ function shapeResponse(response) {
   console.log(response);
   var tor_reponse = [];
   console.log(Object.keys(response).length);
-  return response;
+ 
   if (Object.keys(response).length > 0) {
     for (var key in response) {
       if (response.hasOwnProperty(key)) {
