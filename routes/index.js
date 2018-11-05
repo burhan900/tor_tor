@@ -4,6 +4,9 @@ const PirateBay = require("thepiratebay");
 var cors = require('cors')
 
 router.get("/", function (req, res, next) {
+  console.log("======");
+  console.log(process.env.THEPIRATEBAY_DEFAULT_ENDPOINT);
+  console.log("======");
   res.send('All GOOD');
 });
 
