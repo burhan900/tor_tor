@@ -2,6 +2,17 @@ var express = require("express");
 var router = express.Router();
 const PirateBay = require("thepiratebay");
 var cors = require('cors')
+function initialize() {
+  console.log('========UTL==========');
+  // Return new promise 
+  return new Promise(function (resolve, reject) {
+    PirateBay.getCategories()
+      .then(results => resolve(returnResponse(true, shapeResponse(results))))
+      .catch(err => reject(returnResponse(false, err)));
+
+  })
+
+}
 
 router.get("/", function (req, res, next) {
   console.log("======");
@@ -13,32 +24,38 @@ router.get("/", function (req, res, next) {
 router.post("/tpb/search", function (req, res, next) {
   var torrent_name = req.body.torrent_name;
 
-  if(torrent_name.length <=0 ){
-    res.json(returnResponse(false,'Please Fill Torrent Name With Valid Data'));
+  if (torrent_name.length <= 0) {
+    res.json(returnResponse(false, 'Please Fill Torrent Name With Valid Data'));
   }
 
   PirateBay.search(torrent_name)
-  .then(results => res.json(returnResponse(true,shapeResponse(results))))
-  .catch(err => res.json(returnResponse(false,err)));
+    .then(results => res.json(returnResponse(true, shapeResponse(results))))
+    .catch(err => res.json(returnResponse(false, err)));
 });
 
 router.get("/tpb/categories", function (req, res, next) {
+  var initializePromise = initialize();
+  initializePromise.then(function (result) {
+    res.json(result)
 
-  PirateBay.getCategories()
-  .then(results => res.json(returnResponse(true,shapeResponse(results))))
-  .catch(err => res.json(returnResponse(false,err)));
+  }, function (err) {
+    res.json(err);
+  })
+  // PirateBay.getCategories()
+  // .then(results => res.json(returnResponse(true,shapeResponse(results))))
+  // .catch(err => res.json(returnResponse(false,err)));
 });
 
 router.get("/tpb/top/:id", function (req, res, next) {
   var id = req.params.id;
   PirateBay.topTorrents(id)
-  .then(results => res.json(returnResponse(true,shapeResponse(results))))
-  .catch(err => res.json(returnResponse(false,err)));
+    .then(results => res.json(returnResponse(true, shapeResponse(results))))
+    .catch(err => res.json(returnResponse(false, err)));
 });
 
 
-function returnResponse(status,data){
-  var returnResponse = {status : status,data : data};
+function returnResponse(status, data) {
+  var returnResponse = { status: status, data: data };
   return returnResponse;
 }
 
